@@ -25,6 +25,10 @@ OneScan is a modern QR code-based form management system that allows organizatio
 
 ![WhatsApp Image 2025-03-01 at 07 57 14_9b3612a1](https://github.com/user-attachments/assets/3d7f4d81-7182-4725-bfe7-b553f2c447d0)
 
+## After User Scanning - DB got Updates
+
+![image](https://github.com/user-attachments/assets/4429bf2e-7166-4582-8ec1-5f19ccc0a50c)
+
 
 ## Installation
 

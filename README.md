@@ -19,6 +19,13 @@ OneScan is a modern QR code-based form management system that allows organizatio
 - **Forms**: Dynamic form generation and handling
 - **QR Codes**: QR code generation for form access
 
+## Website Images
+
+![WhatsApp Image 2025-03-01 at 07 56 07_ec243543](https://github.com/user-attachments/assets/5782ee4a-d6fe-4ba0-bdbd-e55d5ba2ffa3)
+
+![WhatsApp Image 2025-03-01 at 07 57 14_9b3612a1](https://github.com/user-attachments/assets/3d7f4d81-7182-4725-bfe7-b553f2c447d0)
+
+
 ## Installation
 
 1. Clone the repository:

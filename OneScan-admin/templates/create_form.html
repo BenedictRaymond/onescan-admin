@@ -1,0 +1,214 @@
+{% extends "base.html" %}
+
+{% block title %}Create Form{% endblock %}
+
+{% block extra_css %}
+<style>
+    .field-type {
+        cursor: pointer;
+        padding: 10px;
+        margin: 5px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: #f8f9fa;
+    }
+
+    .field-type:hover {
+        background-color: #e9ecef;
+    }
+
+    .form-preview {
+        min-height: 200px;
+        border: 2px dashed #ddd;
+        border-radius: 4px;
+        padding: 20px;
+    }
+
+    .form-field {
+        position: relative;
+        padding: 15px;
+        margin: 10px 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background-color: white;
+    }
+
+    .field-actions {
+        position: absolute;
+        right: 10px;
+        top: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Field Types</h5>
+                </div>
+                <div class="card-body">
+                    <div class="field-type" data-type="text">
+                        <i class="fas fa-font"></i> Text Input
+                    </div>
+                    <div class="field-type" data-type="email">
+                        <i class="fas fa-envelope"></i> Email Input
+                    </div>
+                    <div class="field-type" data-type="number">
+                        <i class="fas fa-hashtag"></i> Number Input
+                    </div>
+                    <div class="field-type" data-type="tel">
+                        <i class="fas fa-phone"></i> Phone Input
+                    </div>
+                    <div class="field-type" data-type="date">
+                        <i class="fas fa-calendar"></i> Date Input
+                    </div>
+                    <div class="field-type" data-type="select">
+                        <i class="fas fa-list"></i> Dropdown
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Form Builder</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <label for="formTitle" class="form-label">Form Title</label>
+                        <input type="text" class="form-control" id="formTitle" required>
+                    </div>
+                    <div class="form-preview" id="formPreview">
+                        <div class="text-center text-muted" id="emptyState">
+                            Drag and drop fields here
+                        </div>
+                    </div>
+                    <div class="text-end mt-3">
+                        <button class="btn btn-primary" id="saveForm">Save Form</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/js/all.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const fieldTypes = document.querySelectorAll('.field-type');
+        const formPreview = document.getElementById('formPreview');
+        const emptyState = document.getElementById('emptyState');
+        const saveFormBtn = document.getElementById('saveForm');
+        let fieldCounter = 0;
+
+        fieldTypes.forEach(type => {
+            type.addEventListener('click', function () {
+                addField(this.dataset.type);
+            });
+        });
+
+        function addField(type) {
+            const fieldId = `field-${fieldCounter++}`;
+            emptyState.style.display = 'none';
+
+            const fieldHtml = `
+            <div class="form-field" id="${fieldId}">
+                <div class="field-actions">
+                    <button class="btn btn-sm btn-danger delete-field">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Field Label</label>
+                    <input type="text" class="form-control field-label" placeholder="Enter field label">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Placeholder</label>
+                    <input type="text" class="form-control field-placeholder" placeholder="Enter placeholder text">
+                </div>
+                ${type === 'select' ? `
+                    <div class="mb-3">
+                        <label class="form-label">Options (one per line)</label>
+                        <textarea class="form-control field-options" rows="3"></textarea>
+                    </div>
+                ` : ''}
+                <div class="form-check">
+                    <input type="checkbox" class="form-check-input field-required" id="required-${fieldId}">
+                    <label class="form-check-label" for="required-${fieldId}">Required field</label>
+                </div>
+                <input type="hidden" class="field-type" value="${type}">
+            </div>
+        `;
+
+            formPreview.insertAdjacentHTML('beforeend', fieldHtml);
+
+            // Add delete functionality
+            document.querySelector(`#${fieldId} .delete-field`).addEventListener('click', function () {
+                document.getElementById(fieldId).remove();
+                if (formPreview.querySelectorAll('.form-field').length === 0) {
+                    emptyState.style.display = 'block';
+                }
+            });
+        }
+
+        saveFormBtn.addEventListener('click', function () {
+            const formTitle = document.getElementById('formTitle').value;
+            if (!formTitle) {
+                alert('Please enter a form title');
+                return;
+            }
+
+            const fields = [];
+            document.querySelectorAll('.form-field').forEach((field, index) => {
+                const fieldData = {
+                    id: index,
+                    type: field.querySelector('.field-type').value,
+                    label: field.querySelector('.field-label').value,
+                    placeholder: field.querySelector('.field-placeholder').value,
+                    required: field.querySelector('.field-required').checked
+                };
+
+                if (fieldData.type === 'select') {
+                    fieldData.options = field.querySelector('.field-options').value
+                        .split('\n')
+                        .map(opt => opt.trim())
+                        .filter(opt => opt);
+                }
+
+                fields.push(fieldData);
+            });
+
+            const formData = {
+                title: formTitle,
+                fields: fields
+            };
+
+            // Send the form data to the server
+            fetch('/create_form', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(formData)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        window.location.href = '/dashboard';
+                    } else {
+                        alert('Error saving form');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error saving form');
+                });
+        });
+    });
+</script>
+{% endblock %}
